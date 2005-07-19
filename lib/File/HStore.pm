@@ -3,6 +3,7 @@ package File::HStore;
 use strict;
 use warnings;
 use Digest::SHA1;
+use Digest::SHA2;
 use File::Copy;
 
 require Exporter;
@@ -21,12 +22,12 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 sub new {
 
-    my ( $this, $path ) = @_;
+    my ( $this, $path, $digest, $level, $prefix ) = @_;
     my $class = ref($this) || $this;
     my $self = {};
     bless $self, $class;
@@ -35,6 +36,12 @@ sub new {
 	$self->{path} = $path;
     } else {
 	$self->{path} = "~/.hstore";
+    }
+
+    if (defined($digest))  {
+	$self->{digest} = $digest;
+    } else {
+	$self->{digest} = "SHA1";
     }
 
     if (!(-e $self->{path})) {
@@ -48,7 +55,7 @@ sub add {
 
     my ( $self, $filename ) = @_;
 
-    my $localDigest = DigestAFile("$filename") or die "Unable to digest the file $filename";
+    my $localDigest = DigestAFile("$filename",$self->{digest}) or die "Unable to digest the file $filename";
     my $localSubDir = substr ($localDigest,0,2);
     my $SSubDir = $self->{path}."/".$localSubDir;
 
@@ -67,15 +74,19 @@ sub remove {
 
     my ( $self, $id ) = @_;
 
-    if (!(defined($id))) {die "hash to be removed not defined";}
+#    if (!(defined($id))) {die "hash to be removed not defined";}
+
+    if (!(defined($id))) {return undef;}
 
     my $localSubDir = substr ($id,0,2);
     my $SSubDir = $self->{path}."/".$localSubDir;
     my $destStoredFile = $SSubDir."/".$id;
 
     if (-e $destStoredFile ) {
-	unlink ($destStoredFile) or die "Unable to delete file from hstore named $destStoredFile";
-	return -1;
+	unlink ($destStoredFile) or return undef;
+
+#die "Unable to delete file from hstore named $destStoredFile";
+	#return undef;
     } else {
 	return;
     }
@@ -91,10 +102,18 @@ sub printPath {
 
 sub DigestAFile {
 
-    my $file = shift;
-    my $sha;
+    my $file 	= shift;
+    my $digestdef  = shift;
+     my $sha;
     open (FILED,"$file") or die "Unable to open file $file";
-    $sha = Digest::SHA1->new;
+    if ($digestdef eq "SHA1") {
+     $sha = Digest::SHA1->new;
+    } elsif ($digestdef eq "SHA2") {
+     $sha = Digest::SHA2->new;
+    } 
+    else {
+     print "unknown digest method";
+    }
     $sha->addfile(*FILED);
     close (FILED);
     return  my $digest = $sha->hexdigest;
@@ -132,7 +151,8 @@ first two  bytes of the  hexadecimal form of  the digest. The  file is
 stored and named  with its full hexadecimal form  in the corresponding
 prefixed directory.
 
-The current version is supporting the SHA-1 algorithm.
+The current version is supporting the SHA-1 and SHA-2 (256 bits) 
+algorithm.
 
 =head1 METHODS
 
@@ -141,22 +161,25 @@ section.
 
 The following methods are provided:
 
-=item $store = File::HStore->new($path)
+=item $store = File::HStore->new($path,$digest)
 
 This constructor returns a new C<File::HFile> object encapsulating a
 specific store. The path specifies where the HStore is located on the
 filesystem. If the path is not specified, the path ~/.hstore is used.
+The digest specifies the algorithm to be used (SHA-1 or SHA-2). If not
+specified, SHA-1 is used. Various digest can be mixed in the same path but
+utility is somewhat limited.
 
 =item $store->add($filename)
 
 The $filename is the file to be added in the store. The return value
-is the hash value of the $filename stored. Return -1 on error.
-
+is the hash value of the $filename stored. Return undef on error.
 
 =item $store->remove($hashvalue)
 
-The $hashvalue is the file to be removed from the store. Return value
-0 on success and -1 on error.
+The $hashvalue is the file to be removed from the store. 
+
+Return false on success and undef on error.
 
 =head1 SEE ALSO
 
