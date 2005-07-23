@@ -1,5 +1,9 @@
 Revision history for Perl extension File::HStore.
 
+0.03  Sat Jul 23 11:39:34 2005
+
+	- Fixed the PREREQ_PM
+
 0.02  Tue Jul 19 22:23:48 2005
 	
 	- Support for SHA2 added
