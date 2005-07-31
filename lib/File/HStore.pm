@@ -5,6 +5,7 @@ use warnings;
 use Digest::SHA1;
 use Digest::SHA2;
 use File::Copy;
+use File::Path;
 
 require Exporter;
 use AutoLoader qw(AUTOLOAD);
@@ -22,12 +23,12 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 sub new {
 
-    my ( $this, $path, $digest, $level, $prefix ) = @_;
+    my ( $this, $path, $digest, $prefix ) = @_;
     my $class = ref($this) || $this;
     my $self = {};
     bless $self, $class;
@@ -44,6 +45,12 @@ sub new {
 	$self->{digest} = "SHA1";
     }
 
+    if (defined($prefix))  {
+	$self->{prefix} = $prefix;
+    } else {
+	$self->{prefix} = "freearchive";
+    }
+    
     if (!(-e $self->{path})) {
 	mkdir ($self->{path}) or die "Unable to create directory : $self->{path}";
     }
@@ -54,33 +61,67 @@ sub new {
 sub add {
 
     my ( $self, $filename ) = @_;
+    my $ldigest;
+    my $lSubmitDate;
 
-    my $localDigest = DigestAFile("$filename",$self->{digest}) or die "Unable to digest the file $filename";
-    my $localSubDir = substr ($localDigest,0,2);
-    my $SSubDir = $self->{path}."/".$localSubDir;
+    if ($self->{digest} eq "FAT") {
+	$ldigest = "SHA2";
+    } else {
+	$ldigest = $self->{digest};
+    }
+    my $localDigest = DigestAFile("$filename",$ldigest) or die "Unable to digest the file $filename";
+
+    my $SSubDir;
+
+    if (!($self->{digest} eq "FAT")) {
+	 my $localSubDir = substr ($localDigest,0,2);
+	 $SSubDir = $self->{path}."/".$localSubDir;
+         
+	} else {
+
+	 $lSubmitDate = SubmitDate();
+	 $lSubmitDate =~ s/-/\//g;
+	 $SSubDir = $self->{path}."/".$self->{prefix}."/".$lSubmitDate;
+	 
+	}
 
     if (!(-e $SSubDir)){
-        mkdir $SSubDir or die "Unable to create subdir $SSubDir in the hstore";
+        #mkdir $SSubDir or die "Unable to create subdir $SSubDir in the hstore";
+        mkpath ($SSubDir);
     }
 
     my $destStoredFile = $SSubDir."/".$localDigest;
 
+
     copy($filename,$destStoredFile) or die "Unable to copy file into hstore as $destStoredFile";
 
-    return $localDigest;
+    if (!($self->{digest} eq "FAT")) {
+	return $localDigest;
+    } else {
+	$lSubmitDate =~ s/\//-/g;
+	return $self->{prefix}."-".$lSubmitDate."-".$localDigest;
+    }
 }
 
 sub remove {
 
     my ( $self, $id ) = @_;
 
+    my $destStoredFile;
+
 #    if (!(defined($id))) {die "hash to be removed not defined";}
 
     if (!(defined($id))) {return undef;}
 
-    my $localSubDir = substr ($id,0,2);
-    my $SSubDir = $self->{path}."/".$localSubDir;
-    my $destStoredFile = $SSubDir."/".$id;
+    if (!($self->{digest} eq "FAT")) {
+	my $localSubDir = substr ($id,0,2);
+	my $SSubDir = $self->{path}."/".$localSubDir;
+	$destStoredFile = $SSubDir."/".$id;
+    } else {
+        $id =~ s/-/\//g;
+	$destStoredFile = $self->{path}."/".$id;
+    }
+
 
     if (-e $destStoredFile ) {
 	unlink ($destStoredFile) or return undef;
@@ -120,6 +161,27 @@ sub DigestAFile {
 
 }
 
+# Used only for the Free Archive Toolkit mixed-"hash" format
+#
+# FAT is following this format :
+# 
+# prefix-year-mm-dd-hh-mm-ss-hash
+#
+# The format is represented on disk with the following format :
+#
+# prefix/year/mm/dd/hh/mm/ss/hash
+
+
+# return the date in FAT format 
+
+sub SubmitDate {
+
+    my ($sec, $min, $hour, $day, $month, $year) = (localtime)[0,1,2,3,4,5];
+
+    return sprintf("%04d-%02d-%02d-%02d-%02d-%02d",$year+1900,$month+1,$day,$hour,$min,$sec);
+
+}
+
 
 1;
 __END__
@@ -135,8 +197,10 @@ File::HStore - Perl extension to store files  on a filesystem using a
   use File::HStore;
   my $store = File::HStore ("/tmp/.mystore");
   
+  # Add a file in the store
   my $id = $store->add("/foo/bar.txt");
 
+  # Remove a file by its id from the store
   $store->remove("ff3b73dd85beeaf6e7b34d678ab2615c71eee9d5")
 
 =head1 DESCRIPTION
@@ -151,29 +215,34 @@ first two  bytes of the  hexadecimal form of  the digest. The  file is
 stored and named  with its full hexadecimal form  in the corresponding
 prefixed directory.
 
-The current version is supporting the SHA-1 and SHA-2 (256 bits) 
-algorithm.
+The  current version  is supporting  the  SHA-1 and  SHA-2 (256  bits)
+algorithm. The FAT (Free Archive Toolkit) format is also supported and
+it is  composed of the date  of submission plus the  SHA-2 real digest
+part.
 
 =head1 METHODS
 
-The object oriented interface to C<File::HFile> is described in this
+The object  oriented interface to C<File::HFile> is  described in this
 section.  
 
 The following methods are provided:
 
-=item $store = File::HStore->new($path,$digest)
+=item $store = File::HStore->new($path,$digest,$prefix)
 
-This constructor returns a new C<File::HFile> object encapsulating a
-specific store. The path specifies where the HStore is located on the
-filesystem. If the path is not specified, the path ~/.hstore is used.
-The digest specifies the algorithm to be used (SHA-1 or SHA-2). If not
-specified, SHA-1 is used. Various digest can be mixed in the same path but
-utility is somewhat limited.
+This constructor  returns a new C<File::HFile>  object encapsulating a
+specific store. The path specifies  where the HStore is located on the
+filesystem.  If the  path  is  not specified,  the  path ~/.hstore  is
+used. The digest specifies the algorithm to be used (SHA-1 or SHA-2 or
+the  submission   date  called  FAT).  If  not   specified,  SHA-1  is
+used. Various digest can be mixed  in the same path but the utility is
+somewhat limited.  The $prefix is only  an extension used  for the FAT
+(Free Archive Format) format to specify the archive unique name.
 
 =item $store->add($filename)
 
-The $filename is the file to be added in the store. The return value
+The $filename is  the file to be added in the  store. The return value
 is the hash value of the $filename stored. Return undef on error.
+
 
 =item $store->remove($hashvalue)
 
@@ -183,19 +252,19 @@ Return false on success and undef on error.
 
 =head1 SEE ALSO
 
-There is a web page for the File::HStore module at the following
+There  is a  web page  for the  File::HStore module  at  the following
 location : http://www.foo.be/hstore/
 
-If you plan to use a hash-based storage (like File::HStore), don't
-    forget to read the following paper and check the impact for your
-    application :
+If you  plan to  use a hash-based  storage (like  File::HStore), don't
+forget  to read  the following  paper and  check the  impact  for your
+application :
 
 An Analysis of Compare-by-hash -
 http://www.usenix.org/events/hotos03/tech/full_papers/henson/henson.pdf
 
 =head1 AUTHOR
 
-Alexandre "adulau" Dulaunoy, E<lt>adulau@foo.beE<gt>
+Alexandre "adulau" Dulaunoy, E<lt>adulau@uucp.foo.beE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

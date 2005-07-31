@@ -1,5 +1,11 @@
 Revision history for Perl extension File::HStore.
 
+0.04  Sun Jul 31 13:34:12 2005
+     or the rainy What The Hack 2005 version
+
+	- Fixed the Perl requirement to a lower version
+	- Added support for the Free Archive Format
+
 0.03  Sat Jul 23 11:39:34 2005
 
 	- Fixed the PREREQ_PM
