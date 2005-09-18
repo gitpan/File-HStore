@@ -12,19 +12,21 @@ use AutoLoader qw(AUTOLOAD);
 
 our @ISA = qw(Exporter);
 
+our %EXPORT_TAGS = (
+    'all' => [
+        qw(
 
-our %EXPORT_TAGS = ( 'all' => [ qw(
-	
-) ] );
+            )
+    ]
+);
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw(
-	
+
 );
 
-our $VERSION = '0.04';
-
+our $VERSION = '0.05';
 
 sub new {
 
@@ -33,26 +35,30 @@ sub new {
     my $self = {};
     bless $self, $class;
 
-    if (defined($path)) {
-	$self->{path} = $path;
-    } else {
-	$self->{path} = "~/.hstore";
+    if ( defined($path) ) {
+        $self->{path} = $path;
+    }
+    else {
+        $self->{path} = "~/.hstore";
     }
 
-    if (defined($digest))  {
-	$self->{digest} = $digest;
-    } else {
-	$self->{digest} = "SHA1";
+    if ( defined($digest) ) {
+        $self->{digest} = $digest;
+    }
+    else {
+        $self->{digest} = "SHA1";
     }
 
-    if (defined($prefix))  {
-	$self->{prefix} = $prefix;
-    } else {
-	$self->{prefix} = "freearchive";
+    if ( defined($prefix) ) {
+        $self->{prefix} = $prefix;
     }
-    
-    if (!(-e $self->{path})) {
-	mkdir ($self->{path}) or die "Unable to create directory : $self->{path}";
+    else {
+        $self->{prefix} = "freearchive";
+    }
+
+    if ( !( -e $self->{path} ) ) {
+        mkdir( $self->{path} )
+            or die "Unable to create directory : $self->{path}";
     }
 
     return $self;
@@ -64,42 +70,47 @@ sub add {
     my $ldigest;
     my $lSubmitDate;
 
-    if ($self->{digest} eq "FAT") {
-	$ldigest = "SHA2";
-    } else {
-	$ldigest = $self->{digest};
+    if ( $self->{digest} eq "FAT" ) {
+        $ldigest = "SHA2";
     }
-    my $localDigest = DigestAFile("$filename",$ldigest) or die "Unable to digest the file $filename";
+    else {
+        $ldigest = $self->{digest};
+    }
+    my $localDigest = DigestAFile( "$filename", $ldigest )
+        or die "Unable to digest the file $filename";
 
     my $SSubDir;
 
-    if (!($self->{digest} eq "FAT")) {
-	 my $localSubDir = substr ($localDigest,0,2);
-	 $SSubDir = $self->{path}."/".$localSubDir;
-         
-	} else {
+    if ( !( $self->{digest} eq "FAT" ) ) {
+        my $localSubDir = substr( $localDigest, 0, 2 );
+        $SSubDir = $self->{path} . "/" . $localSubDir;
 
-	 $lSubmitDate = SubmitDate();
-	 $lSubmitDate =~ s/-/\//g;
-	 $SSubDir = $self->{path}."/".$self->{prefix}."/".$lSubmitDate;
-	 
-	}
+    }
+    else {
 
-    if (!(-e $SSubDir)){
-        #mkdir $SSubDir or die "Unable to create subdir $SSubDir in the hstore";
-        mkpath ($SSubDir);
+        $lSubmitDate = SubmitDate();
+        $lSubmitDate =~ s/-/\//g;
+        $SSubDir = $self->{path} . "/" . $self->{prefix} . "/" . $lSubmitDate;
+
     }
 
-    my $destStoredFile = $SSubDir."/".$localDigest;
+    if ( !( -e $SSubDir ) ) {
 
+      #mkdir $SSubDir or die "Unable to create subdir $SSubDir in the hstore";
+        mkpath($SSubDir);
+    }
 
-    copy($filename,$destStoredFile) or die "Unable to copy file into hstore as $destStoredFile";
+    my $destStoredFile = $SSubDir . "/" . $localDigest;
 
-    if (!($self->{digest} eq "FAT")) {
-	return $localDigest;
-    } else {
-	$lSubmitDate =~ s/\//-/g;
-	return $self->{prefix}."-".$lSubmitDate."-".$localDigest;
+    copy( $filename, $destStoredFile )
+        or die "Unable to copy file into hstore as $destStoredFile";
+
+    if ( !( $self->{digest} eq "FAT" ) ) {
+        return $localDigest;
+    }
+    else {
+        $lSubmitDate =~ s/\//-/g;
+        return $self->{prefix} . "-" . $lSubmitDate . "-" . $localDigest;
     }
 }
 
@@ -109,33 +120,34 @@ sub remove {
 
     my $destStoredFile;
 
-#    if (!(defined($id))) {die "hash to be removed not defined";}
+    #    if (!(defined($id))) {die "hash to be removed not defined";}
 
-    if (!(defined($id))) {return undef;}
+    if ( !( defined($id) ) ) { return undef; }
 
-    if (!($self->{digest} eq "FAT")) {
-	my $localSubDir = substr ($id,0,2);
-	my $SSubDir = $self->{path}."/".$localSubDir;
-	$destStoredFile = $SSubDir."/".$id;
-    } else {
+    if ( !( $self->{digest} eq "FAT" ) ) {
+        my $localSubDir = substr( $id, 0, 2 );
+        my $SSubDir = $self->{path} . "/" . $localSubDir;
+        $destStoredFile = $SSubDir . "/" . $id;
+    }
+    else {
         $id =~ s/-/\//g;
-	$destStoredFile = $self->{path}."/".$id;
+        $destStoredFile = $self->{path} . "/" . $id;
     }
 
+    if ( -e $destStoredFile ) {
+        unlink($destStoredFile) or return undef;
 
-    if (-e $destStoredFile ) {
-	unlink ($destStoredFile) or return undef;
-
-#die "Unable to delete file from hstore named $destStoredFile";
-	#return undef;
-    } else {
-	return;
+        #die "Unable to delete file from hstore named $destStoredFile";
+        #return undef;
+    }
+    else {
+        return;
     }
 
 }
 
 sub printPath {
-    my ( $self ) = @_;
+    my ($self) = @_;
 
     return $self->{path};
 
@@ -143,49 +155,52 @@ sub printPath {
 
 sub DigestAFile {
 
-    my $file 	= shift;
-    my $digestdef  = shift;
-     my $sha;
-    open (FILED,"$file") or die "Unable to open file $file";
-    if ($digestdef eq "SHA1") {
-     $sha = Digest::SHA1->new;
-    } elsif ($digestdef eq "SHA2") {
-     $sha = Digest::SHA2->new;
-    } 
+    my $file      = shift;
+    my $digestdef = shift;
+    my $sha;
+    open( FILED, "$file" ) or die "Unable to open file $file";
+    if ( $digestdef eq "SHA1" ) {
+        $sha = Digest::SHA1->new;
+    }
+    elsif ( $digestdef eq "SHA2" ) {
+        $sha = Digest::SHA2->new;
+    }
     else {
-     print "unknown digest method";
+        print "unknown digest method";
     }
     $sha->addfile(*FILED);
-    close (FILED);
-    return  my $digest = $sha->hexdigest;
+    close(FILED);
+    return my $digest = $sha->hexdigest;
 
 }
 
 # Used only for the Free Archive Toolkit mixed-"hash" format
 #
 # FAT is following this format :
-# 
+#
 # prefix-year-mm-dd-hh-mm-ss-hash
 #
 # The format is represented on disk with the following format :
 #
 # prefix/year/mm/dd/hh/mm/ss/hash
 
-
-# return the date in FAT format 
+# return the date in FAT format
 
 sub SubmitDate {
 
-    my ($sec, $min, $hour, $day, $month, $year) = (localtime)[0,1,2,3,4,5];
+    my ( $sec, $min, $hour, $day, $month, $year ) =
+        (localtime)[ 0, 1, 2, 3, 4, 5 ];
 
-    return sprintf("%04d-%02d-%02d-%02d-%02d-%02d",$year+1900,$month+1,$day,$hour,$min,$sec);
+    return sprintf(
+        "%04d-%02d-%02d-%02d-%02d-%02d",
+        $year + 1900,
+        $month + 1, $day, $hour, $min, $sec
+    );
 
 }
 
-
 1;
 __END__
-
 
 =head1 NAME
 
@@ -261,6 +276,13 @@ application :
 
 An Analysis of Compare-by-hash -
 http://www.usenix.org/events/hotos03/tech/full_papers/henson/henson.pdf
+
+Please  also   consider  the  security  impact   in  your  application
+concerning  the  statement made  by  the  NIST  regarding the  overall
+security impact  of the  SHA-1 vulnereability. In  the use  of storage
+and unique identifier only , the impact is somewhat very limited.
+
+http://csrc.nist.gov/news-highlights/NIST-Brief-Comments-on-SHA1-attack.pdf
 
 =head1 AUTHOR
 

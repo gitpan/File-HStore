@@ -1,5 +1,11 @@
 Revision history for Perl extension File::HStore.
 
+0.05  Sun Sep 18 21:45:23 005
+
+	- Minor cleanup in the library
+	- Added a comment regarding the SHA-1 vulnerability
+	  (following the Mark Shelor request, thanks to him)
+
 0.04  Sun Jul 31 13:34:12 2005
      or the rainy What The Hack 2005 version
 

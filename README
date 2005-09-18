@@ -1,4 +1,4 @@
-File-HStore version 0.04
+File-HStore version 0.05
 ========================
 
 
@@ -34,9 +34,9 @@ This module requires the following modules :
   Digest::SHA1
   Digest::SHA2
   File::Copy
+  File::Path
 
 COPYRIGHT AND LICENCE
-
 
 Copyright (C) 2004,2005 by Alexandre Dulaunoy <adulau@uucp.foo.be>
 
