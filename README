@@ -1,4 +1,4 @@
-File-HStore version 0.05
+File-HStore version 0.06
 ========================
 
 
@@ -38,7 +38,7 @@ This module requires the following modules :
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2004,2005 by Alexandre Dulaunoy <adulau@uucp.foo.be>
+Copyright (C) 2004,2005,2006 by Alexandre Dulaunoy <adulau@uucp.foo.be>
 
 This library is  free software; you can redistribute  it and/or modify
 it under the same terms as  Perl itself, either Perl version 5.8.5 or,

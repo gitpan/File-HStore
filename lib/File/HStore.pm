@@ -26,7 +26,7 @@ our @EXPORT = qw(
 
 );
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub new {
 
@@ -102,8 +102,13 @@ sub add {
 
     my $destStoredFile = $SSubDir . "/" . $localDigest;
 
-    copy( $filename, $destStoredFile )
+    if ( !( $self->{digest} eq "FAT" ) ) {
+        copy( $filename, $destStoredFile )
         or die "Unable to copy file into hstore as $destStoredFile";
+    } else {
+        mkpath($destStoredFile);
+        copy( $filename, $destStoredFile);
+    }
 
     if ( !( $self->{digest} eq "FAT" ) ) {
         return $localDigest;
@@ -135,7 +140,13 @@ sub remove {
     }
 
     if ( -e $destStoredFile ) {
-        unlink($destStoredFile) or return undef;
+        print $destStoredFile;
+        if ( !( $self->{digest} eq "FAT" ) ) {
+            unlink($destStoredFile) or return undef;
+        }
+        else {
+            rmtree($destStoredFile) or return undef;
+        }
 
         #die "Unable to delete file from hstore named $destStoredFile";
         #return undef;
@@ -290,7 +301,7 @@ Alexandre "adulau" Dulaunoy, E<lt>adulau@uucp.foo.beE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2004,2005 by Alexandre Dulaunoy <adulau@uucp.foo.be>
+Copyright (C) 2004,2005,2006 by Alexandre Dulaunoy <adulau@uucp.foo.be>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.5 or,

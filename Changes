@@ -1,6 +1,10 @@
 Revision history for Perl extension File::HStore.
 
-0.05  Sun Sep 18 21:45:23 005
+0.06  Sun Jan 1 16:19:22 2006
+
+	- Fixed the FAT format bug / to keep the real name of the file
+
+0.05  Sun Sep 18 21:45:23 2005
 
 	- Minor cleanup in the library
 	- Added a comment regarding the SHA-1 vulnerability
