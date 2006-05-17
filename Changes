@@ -1,5 +1,10 @@
 Revision history for Perl extension File::HStore.
 
+0.07  Wed May 17 22:58:17 2006
+	
+	- Fixed POD errors
+	- pod.t test added
+
 0.06  Sun Jan 1 16:19:22 2006
 
 	- Fixed the FAT format bug / to keep the real name of the file
@@ -26,5 +31,6 @@ Revision history for Perl extension File::HStore.
 	- Made return codes more consistent
 
 0.01  Sun Jun 19 11:00:40 2005
+
 	- First release of File::HStore 0.01
 

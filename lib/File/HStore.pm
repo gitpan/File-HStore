@@ -26,7 +26,7 @@ our @EXPORT = qw(
 
 );
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub new {
 
@@ -253,6 +253,8 @@ section.
 
 The following methods are provided:
 
+=over 4
+
 =item $store = File::HStore->new($path,$digest,$prefix)
 
 This constructor  returns a new C<File::HFile>  object encapsulating a
@@ -275,6 +277,8 @@ is the hash value of the $filename stored. Return undef on error.
 The $hashvalue is the file to be removed from the store. 
 
 Return false on success and undef on error.
+
+=back
 
 =head1 SEE ALSO
 
