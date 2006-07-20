@@ -22,11 +22,9 @@ our %EXPORT_TAGS = (
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(
+our @EXPORT = qw( );
 
-);
-
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 sub new {
 
@@ -76,7 +74,7 @@ sub add {
     else {
         $ldigest = $self->{digest};
     }
-    my $localDigest = DigestAFile( "$filename", $ldigest )
+    my $localDigest = _DigestAFile( "$filename", $ldigest )
         or die "Unable to digest the file $filename";
 
     my $SSubDir;
@@ -88,7 +86,7 @@ sub add {
     }
     else {
 
-        $lSubmitDate = SubmitDate();
+        $lSubmitDate = _SubmitDate();
         $lSubmitDate =~ s/-/\//g;
         $SSubDir = $self->{path} . "/" . $self->{prefix} . "/" . $lSubmitDate;
 
@@ -157,14 +155,14 @@ sub remove {
 
 }
 
-sub printPath {
+sub _printPath {
     my ($self) = @_;
 
     return $self->{path};
 
 }
 
-sub DigestAFile {
+sub _DigestAFile {
 
     my $file      = shift;
     my $digestdef = shift;
@@ -197,7 +195,7 @@ sub DigestAFile {
 
 # return the date in FAT format
 
-sub SubmitDate {
+sub _SubmitDate {
 
     my ( $sec, $min, $hour, $day, $month, $year ) =
         (localtime)[ 0, 1, 2, 3, 4, 5 ];
