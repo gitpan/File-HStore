@@ -1,15 +1,18 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         File-HStore
-version:      0.08
-version_from: lib/File/HStore.pm
-installdirs:  site
-requires:
+--- #YAML:1.0
+name:                File-HStore
+version:             0.09
+abstract:            Perl extension to store files  on a filesystem using a
+license:             perl
+generated_by:        ExtUtils::MakeMaker version 6.31
+distribution_type:   module
+requires:     
     Digest::SHA1:                  0
     Digest::SHA2:                  0
     File::Copy:                    0
     File::Path:                    0
     Test::More:                    0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
+    version: 1.2
+author:
+    - Alexandre Dulaunoy <adulau@foo.be>

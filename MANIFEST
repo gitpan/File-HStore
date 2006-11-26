@@ -7,3 +7,4 @@ t/pod.t
 t/pod-coverage.t
 lib/File/HStore.pm
 META.yml                                 Module meta-data (added by MakeMaker)
+example/usage.pl

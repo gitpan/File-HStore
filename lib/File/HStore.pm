@@ -24,7 +24,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw( );
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 sub new {
 
@@ -94,8 +94,7 @@ sub add {
 
     if ( !( -e $SSubDir ) ) {
 
-      #mkdir $SSubDir or die "Unable to create subdir $SSubDir in the hstore";
-        mkpath($SSubDir);
+        mkpath($SSubDir) or die "Unable to create subdirectoris $SSubDir in the hstore";
     }
 
     my $destStoredFile = $SSubDir . "/" . $localDigest;
@@ -138,7 +137,7 @@ sub remove {
     }
 
     if ( -e $destStoredFile ) {
-        print $destStoredFile;
+
         if ( !( $self->{digest} eq "FAT" ) ) {
             unlink($destStoredFile) or return undef;
         }
@@ -153,6 +152,29 @@ sub remove {
         return;
     }
 
+}
+
+sub getpath {
+
+    my ( $self, $id ) = @_;
+
+    my $destStoredFile;
+
+    if ( !( $self->{digest} eq "FAT" ) ) {
+        my $localSubDir = substr( $id, 0, 2 );
+        my $SSubDir = $self->{path} . "/" . $localSubDir;
+        $destStoredFile = $SSubDir . "/" . $id;
+    }
+    else {
+        $id =~ s/-/\//g;
+        $destStoredFile = $self->{path} . "/" . $id;
+    }
+
+    if ( -e $destStoredFile ) {
+	return $destStoredFile;
+    } else {
+	return;
+    }
 }
 
 sub _printPath {
@@ -224,6 +246,9 @@ File::HStore - Perl extension to store files  on a filesystem using a
   # Add a file in the store
   my $id = $store->add("/foo/bar.txt");
 
+  # Return the filesystem location of an id
+  my $location = $store->getpath($id);
+
   # Remove a file by its id from the store
   $store->remove("ff3b73dd85beeaf6e7b34d678ab2615c71eee9d5")
 
@@ -267,8 +292,13 @@ somewhat limited.  The $prefix is only  an extension used  for the FAT
 =item $store->add($filename)
 
 The $filename is  the file to be added in the  store. The return value
-is the hash value of the $filename stored. Return undef on error.
+is the hash value ($id) of the $filename stored. Return undef on error.
 
+=item $store->getpath($id)
+
+Return the filesystem location of the file specified by its hash value.
+
+Return undef on error.
 
 =item $store->remove($hashvalue)
 

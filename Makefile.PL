@@ -12,5 +12,6 @@ WriteMakefile(
 			   'File::Path' => '0' }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/File/HStore.pm', # retrieve abstract from module
+       LICENSE	      => 'perl',
        AUTHOR         => 'Alexandre Dulaunoy <adulau@foo.be>') : ()),
 );

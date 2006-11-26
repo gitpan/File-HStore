@@ -1,5 +1,13 @@
 Revision history for Perl extension File::HStore.
 
+0.09  Sun Nov 26 16:03:21 2006
+
+	- An example added
+	- Added the getpath function to get fs location of an id
+	- The debug print removed
+	- Metafile fixed
+	- added the lib path in test
+
 0.08  Thu Jul 20 16:15:30 2006
 	
 	- Privating internal function
