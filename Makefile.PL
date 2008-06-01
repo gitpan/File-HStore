@@ -5,8 +5,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'File::HStore',
     VERSION_FROM      => 'lib/File/HStore.pm', # finds $VERSION
-    PREREQ_PM         => { 'Digest::SHA1' => '0', 
-			   'Digest::SHA2' => '0', 
+    PREREQ_PM         => { 'Digest::SHA' => '0',
 			   'File::Copy' => '0',
 			   'Test::More' => '0',
 			   'File::Path' => '0' }, # e.g., Module::Name => 1.1

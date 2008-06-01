@@ -2,8 +2,7 @@ package File::HStore;
 
 use strict;
 use warnings;
-use Digest::SHA1;
-use Digest::SHA2;
+use Digest::SHA;
 use File::Copy;
 use File::Path;
 
@@ -24,7 +23,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = qw( );
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 sub new {
 
@@ -191,10 +190,10 @@ sub _DigestAFile {
     my $sha;
     open( FILED, "$file" ) or die "Unable to open file $file";
     if ( $digestdef eq "SHA1" ) {
-        $sha = Digest::SHA1->new;
+        $sha = Digest::SHA->new("sha1");
     }
     elsif ( $digestdef eq "SHA2" ) {
-        $sha = Digest::SHA2->new;
+        $sha = Digest::SHA->new("sha256");
     }
     else {
         print "unknown digest method";
@@ -329,11 +328,11 @@ http://csrc.nist.gov/news-highlights/NIST-Brief-Comments-on-SHA1-attack.pdf
 
 =head1 AUTHOR
 
-Alexandre "adulau" Dulaunoy, E<lt>adulau@uucp.foo.beE<gt>
+Alexandre "adulau" Dulaunoy, E<lt>adulau@foo.beE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2004,2005,2006 by Alexandre Dulaunoy <adulau@uucp.foo.be>
+Copyright (C) 2004-2008 by Alexandre Dulaunoy <adulau@uucp.foo.be>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.5 or,

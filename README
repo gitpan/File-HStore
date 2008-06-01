@@ -1,4 +1,4 @@
-File-HStore version 0.09
+File-HStore version 0.10
 ========================
 
 
@@ -31,15 +31,14 @@ DEPENDENCIES
 
 This module requires the following modules :
 
-  Digest::SHA1
-  Digest::SHA2
+  Digest::SHA
   File::Copy
   File::Path
   Test::More
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2004,2005,2006 by Alexandre Dulaunoy <adulau@uucp.foo.be>
+Copyright (C) 2004-2008 by Alexandre Dulaunoy <adulau@foo.be>
 
 This library is  free software; you can redistribute  it and/or modify
 it under the same terms as  Perl itself, either Perl version 5.8.5 or,
